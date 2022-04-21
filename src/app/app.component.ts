@@ -1,22 +1,29 @@
 import { Component } from '@angular/core';
 
+declare var require: any;
+const isPrime = require('prime-number');
+const primeNumberList = require('prime-number/list');
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
   title = 'ng-web-worker';
+
+  runWorker() {
+    const worker = new Worker(new URL('./app.worker', import.meta.url));
+    worker.onmessage = ({ data }) => {
+      console.log('From Web Worker:', data);
+    };
+    worker.postMessage({});
+  }
+  runThread() {
+    const arePrimeList = primeNumberList.map((prime: any) => {
+      return isPrime(prime);
+    });
+    console.log('From Javascript Thread', arePrimeList);
+  }
 }
 
-if (typeof Worker !== 'undefined') {
-  // Create a new
-  const worker = new Worker(new URL('./app.worker', import.meta.url));
-  worker.onmessage = ({ data }) => {
-    console.log(`page got message: ${data}`);
-  };
-  worker.postMessage('hello');
-} else {
-  // Web Workers are not supported in this environment.
-  // You should add a fallback so that your program still executes correctly.
-}
